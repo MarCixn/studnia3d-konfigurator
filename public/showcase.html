@@ -278,6 +278,81 @@
                 height: 180px;
             }
         }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            animation: lightboxIn 0.3s ease;
+        }
+
+        @keyframes lightboxIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .zoomable {
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .zoomable:hover {
+            transform: scale(1.02);
+        }
+
+        .feature-card .zoomable:hover {
+            transform: none;
+        }
     </style>
 </head>
 <body>
@@ -286,7 +361,7 @@
         <h1>Konfigurator Studni 3D</h1>
         <p class="subtitle">Interaktywne narzedzie do konfiguracji studni betonowych z wizualizacja 3D, wykrywaniem kolizji i eksportem dokumentacji.</p>
 
-        <img src="showcase/start.png" alt="Konfigurator Studni 3D - widok glowny" class="hero-image">
+        <img src="showcase/start.png" alt="Konfigurator Studni 3D - widok glowny" class="hero-image zoomable">
 
         <div class="cta-buttons">
             <a href="./" class="btn btn-primary">
@@ -350,7 +425,7 @@
 
             <div class="features-grid">
                 <div class="feature-card">
-                    <img src="showcase/widok-gora.png" alt="Wizualizacja 3D studni">
+                    <img src="showcase/widok-gora.png" alt="Wizualizacja 3D studni" class="zoomable">
                     <div class="feature-content">
                         <h3>Wizualizacja 3D</h3>
                         <p>Interaktywny podglad studni z mozliwoscia obracania, przybliżania i pomiaru odleglosci. Widok z kazdej strony w czasie rzeczywistym.</p>
@@ -358,7 +433,7 @@
                 </div>
 
                 <div class="feature-card">
-                    <img src="showcase/kolizja.png" alt="Wykrywanie kolizji muf">
+                    <img src="showcase/kolizja.png" alt="Wykrywanie kolizji muf" class="zoomable">
                     <div class="feature-content">
                         <h3>Wykrywanie kolizji</h3>
                         <p>Automatyczne sprawdzanie czy mufy nie koliduja ze soba. Ostrzezenie pojawia sie natychmiast gdy odleglosc jest zbyt mala.</p>
@@ -366,7 +441,7 @@
                 </div>
 
                 <div class="feature-card">
-                    <img src="showcase/karta-pdf.png" alt="Karta technologiczna PDF">
+                    <img src="showcase/karta-pdf.png" alt="Karta technologiczna PDF" class="zoomable">
                     <div class="feature-content">
                         <h3>Karta technologiczna PDF</h3>
                         <p>Eksport kompletnej dokumentacji z widokiem od gory, lista muf, katami i wymiarami. Gotowe do druku dla hali produkcyjnej.</p>
@@ -374,7 +449,7 @@
                 </div>
 
                 <div class="feature-card">
-                    <img src="showcase/typy-muf.png" alt="Dodawanie typow muf">
+                    <img src="showcase/typy-muf.png" alt="Dodawanie typow muf" class="zoomable">
                     <div class="feature-content">
                         <h3>Wlasne typy muf</h3>
                         <p>Definiowanie wlasnych typow muf z ustawieniem srednicy wewnetrznej, zewnetrznej i koloru wizualizacji.</p>
@@ -382,7 +457,7 @@
                 </div>
 
                 <div class="feature-card">
-                    <img src="showcase/ustawienia.png" alt="Ustawienia konfiguratora">
+                    <img src="showcase/ustawienia.png" alt="Ustawienia konfiguratora" class="zoomable">
                     <div class="feature-content">
                         <h3>Elastyczne ustawienia</h3>
                         <p>Konfiguracja sposobu liczenia wysokosci muf (od dna/gory), globalny margines kolizyjny i tryb debug.</p>
@@ -390,7 +465,7 @@
                 </div>
 
                 <div class="feature-card">
-                    <img src="showcase/start.png" alt="Responsywny interfejs">
+                    <img src="showcase/start.png" alt="Responsywny interfejs" class="zoomable">
                     <div class="feature-content">
                         <h3>Responsywny interfejs</h3>
                         <p>Dzialaj na komputerze, tablecie i telefonie. Panel boczny chowa sie automatycznie na malych ekranach.</p>
@@ -413,5 +488,42 @@
         <p>Demo konfiguratora studni wykonane przez <a href="https://codewelder.pl" target="_blank">Marcin Lotocki / CodeWelder</a></p>
         <p style="margin-top: 8px; font-size: 12px;">Zainteresowany wdrozeniem? <a href="mailto:marcixn1@gmail.com">Napisz do mnie</a></p>
     </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <img src="" alt="" id="lightbox-img">
+    </div>
+
+    <script>
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        document.querySelectorAll('.zoomable').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightboxImg.alt = img.alt;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+    </script>
 </body>
 </html>
