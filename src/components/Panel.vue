@@ -184,6 +184,7 @@ function eksportujPdf() {
 
   .panel-footer {
     padding: 12px 15px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 20px));
   }
 
   h2 {
