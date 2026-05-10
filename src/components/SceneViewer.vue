@@ -278,18 +278,19 @@ onUnmounted(() => {
 .kolizja-warning {
   position: absolute;
   top: 15px;
-  right: 15px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #ef4444;
   color: #fff;
-  padding: 10px 16px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-  z-index: 10;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+  z-index: 20;
   animation: pulse 1.5s infinite;
 }
 
@@ -357,10 +358,11 @@ onUnmounted(() => {
 
   .kolizja-warning {
     top: 10px;
-    right: 50px;
-    padding: 6px 10px;
-    font-size: 11px;
-    gap: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    font-size: 13px;
+    gap: 8px;
   }
 
   .kolizja-icon {
