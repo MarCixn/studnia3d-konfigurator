@@ -8,9 +8,11 @@
       <SceneViewer @click="onSceneClick" />
       <Panel :isOpen="panelOpen" @toggle="panelOpen = !panelOpen" />
       <button class="panel-toggle" @click="panelOpen = !panelOpen" :class="{ open: panelOpen }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 18l-6-6 6-6" v-if="!panelOpen"/>
-          <path d="M9 18l6-6-6-6" v-else/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-chevron">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-close">
+          <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
       </button>
     </div>
@@ -117,10 +119,26 @@ body {
 .panel-toggle svg {
   width: 20px;
   height: 20px;
+  position: absolute;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.panel-toggle .icon-chevron {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.panel-toggle .icon-close {
+  opacity: 0;
+  transform: rotate(-90deg);
 }
 
 .panel-toggle.open {
   right: min(380px, 85vw);
+}
+
+.panel-toggle.open .icon-chevron {
+  transform: rotate(180deg);
 }
 
 @media (max-width: 900px) {
@@ -154,8 +172,27 @@ body {
   }
 
   .panel-toggle.open {
-    right: 100vw;
-    transform: translateY(-50%) translateX(100%);
+    right: 10px;
+    top: 10px;
+    transform: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #ef4444;
+  }
+
+  .panel-toggle.open:hover {
+    background: #dc2626;
+  }
+
+  .panel-toggle.open .icon-chevron {
+    opacity: 0;
+    transform: rotate(90deg);
+  }
+
+  .panel-toggle.open .icon-close {
+    opacity: 1;
+    transform: rotate(0deg);
   }
 }
 </style>
