@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurator Studni 3D - Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 50px;
+            font-size: 13px;
+            color: #f59e0b;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #94a3b8;
+            max-width: 600px;
+            margin-bottom: 32px;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 900px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(245, 158, 11, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        section {
+            padding: 80px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #f59e0b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            margin-bottom: 12px;
+        }
+
+        .section-desc {
+            color: #94a3b8;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .feature-content {
+            padding: 24px;
+        }
+
+        .feature-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #f59e0b;
+        }
+
+        .feature-content p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .benefits {
+            background: rgba(245, 158, 11, 0.05);
+            border-top: 1px solid rgba(245, 158, 11, 0.2);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+        }
+
+        .benefit-item {
+            text-align: center;
+        }
+
+        .benefit-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .benefit-icon svg {
+            width: 32px;
+            height: 32px;
+            color: #f59e0b;
+        }
+
+        .benefit-item h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .benefit-item p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .tech-tag {
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #60a5fa;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        footer p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #f59e0b;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card img {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <span class="badge">DEMO - Proof of Concept</span>
+        <h1>Konfigurator Studni 3D</h1>
+        <p class="subtitle">Interaktywne narzedzie do konfiguracji studni betonowych z wizualizacja 3D, wykrywaniem kolizji i eksportem dokumentacji.</p>
+
+        <img src="showcase/start.png" alt="Konfigurator Studni 3D - widok glowny" class="hero-image">
+
+        <div class="cta-buttons">
+            <a href="./" class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Uruchom Demo
+            </a>
+            <a href="https://codewelder.pl" class="btn btn-secondary" target="_blank">
+                Wiecej projektow
+            </a>
+        </div>
+    </section>
+
+    <section class="benefits">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Korzysci</span>
+                <h2>Dlaczego warto?</h2>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Szybka walidacja</h3>
+                    <p>Sprawdzenie wykonalnosci konfiguracji w sekundy zamiast minut</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3>Eliminacja bledow</h3>
+                    <p>Automatyczne wykrywanie kolizji muf przed produkcja</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>
+                        </svg>
+                    </div>
+                    <h3>Dokumentacja PDF</h3>
+                    <p>Generowanie karty technologicznej dla produkcji jednym kliknieciem</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Funkcje</span>
+                <h2>Co potrafi konfigurator?</h2>
+                <p class="section-desc">Kompleksowe narzedzie do projektowania studni betonowych</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="showcase/widok-gora.png" alt="Wizualizacja 3D studni">
+                    <div class="feature-content">
+                        <h3>Wizualizacja 3D</h3>
+                        <p>Interaktywny podglad studni z mozliwoscia obracania, przybliżania i pomiaru odleglosci. Widok z kazdej strony w czasie rzeczywistym.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="showcase/kolizja.png" alt="Wykrywanie kolizji muf">
+                    <div class="feature-content">
+                        <h3>Wykrywanie kolizji</h3>
+                        <p>Automatyczne sprawdzanie czy mufy nie koliduja ze soba. Ostrzezenie pojawia sie natychmiast gdy odleglosc jest zbyt mala.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="showcase/karta-pdf.png" alt="Karta technologiczna PDF">
+                    <div class="feature-content">
+                        <h3>Karta technologiczna PDF</h3>
+                        <p>Eksport kompletnej dokumentacji z widokiem od gory, lista muf, katami i wymiarami. Gotowe do druku dla hali produkcyjnej.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="showcase/typy-muf.png" alt="Dodawanie typow muf">
+                    <div class="feature-content">
+                        <h3>Wlasne typy muf</h3>
+                        <p>Definiowanie wlasnych typow muf z ustawieniem srednicy wewnetrznej, zewnetrznej i koloru wizualizacji.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="showcase/ustawienia.png" alt="Ustawienia konfiguratora">
+                    <div class="feature-content">
+                        <h3>Elastyczne ustawienia</h3>
+                        <p>Konfiguracja sposobu liczenia wysokosci muf (od dna/gory), globalny margines kolizyjny i tryb debug.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="showcase/start.png" alt="Responsywny interfejs">
+                    <div class="feature-content">
+                        <h3>Responsywny interfejs</h3>
+                        <p>Dzialaj na komputerze, tablecie i telefonie. Panel boczny chowa sie automatycznie na malych ekranach.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tech-stack">
+                <span class="tech-tag">Vue.js 3</span>
+                <span class="tech-tag">Three.js</span>
+                <span class="tech-tag">WebGL</span>
+                <span class="tech-tag">jsPDF</span>
+                <span class="tech-tag">Vite</span>
+                <span class="tech-tag">GitHub Pages</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Demo konfiguratora studni wykonane przez <a href="https://codewelder.pl" target="_blank">Marcin Lotocki / CodeWelder</a></p>
+        <p style="margin-top: 8px; font-size: 12px;">Zainteresowany wdrozeniem? <a href="mailto:marcixn1@gmail.com">Napisz do mnie</a></p>
+    </footer>
+</body>
+</html>
