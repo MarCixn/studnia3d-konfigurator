@@ -2,6 +2,10 @@
   <div class="app-wrapper">
     <div class="demo-banner">
       <span class="demo-title">DEMO KONFIGURATOR</span>
+      <a href="./showcase.html" class="demo-info">
+        <img src="./showcase/start.png" alt="O projekcie" class="demo-thumb" />
+        <span>O projekcie</span>
+      </a>
       <span class="demo-author">Wykonanie: Marcin Łotocki</span>
     </div>
     <div class="app">
@@ -84,6 +88,33 @@ body {
   opacity: 0.9;
 }
 
+.demo-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px 4px 4px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.demo-info:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.02);
+}
+
+.demo-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
 .app {
   display: flex;
   width: 100%;
@@ -154,21 +185,48 @@ body {
   .demo-author {
     font-size: 10px;
   }
+
+  .demo-info {
+    padding: 3px 10px 3px 3px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .demo-thumb {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 @media (max-width: 480px) {
   .demo-banner {
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 12px;
     text-align: center;
   }
 
   .demo-title {
     font-size: 11px;
+    order: 1;
+    width: 100%;
   }
 
   .demo-author {
     font-size: 9px;
+    order: 3;
+  }
+
+  .demo-info {
+    order: 2;
+    font-size: 10px;
+    padding: 2px 8px 2px 2px;
+  }
+
+  .demo-thumb {
+    width: 20px;
+    height: 20px;
   }
 
   .panel-toggle.open {
