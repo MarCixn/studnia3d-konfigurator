@@ -1,5 +1,5 @@
 <template>
-  <div class="scene-container" ref="containerRef">
+  <div class="scene-container" ref="containerRef" @touchstart="$emit('click')" @mousedown="$emit('click')">
     <!-- Toolbar z narzędziami pomiarowymi -->
     <div class="toolbar">
       <button
@@ -49,6 +49,16 @@
           <circle cx="12" cy="12" r="2"/>
         </svg>
       </button>
+      <button
+        class="tool-btn"
+        @click="centerCamera"
+        title="Wyśrodkuj kamerę"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Panel wyniku pomiaru -->
@@ -96,8 +106,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useThreeScene } from '../composables/useThreeScene'
 import { store, actions } from '../stores/studniaStore'
 
+defineEmits(['click'])
+
 const containerRef = ref(null)
-const { init, dispose } = useThreeScene(containerRef)
+const { init, dispose, centerCamera } = useThreeScene(containerRef)
 
 const kolizjeText = computed(() => {
   return store.kolizje.map(([i, j]) => `#${i + 1} - #${j + 1}`).join(', ')
@@ -310,5 +322,64 @@ onUnmounted(() => {
   font-weight: 600;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    top: 10px;
+    left: 10px;
+    gap: 5px;
+  }
+
+  .tool-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tool-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pomiar-panel {
+    top: 55px;
+    left: 10px;
+    min-width: 150px;
+    font-size: 12px;
+  }
+
+  .info {
+    bottom: 10px;
+    left: 10px;
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  .kolizja-warning {
+    top: 10px;
+    right: 50px;
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .kolizja-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+  }
+
+  .debug-badge {
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .info {
+    display: none;
+  }
 }
 </style>

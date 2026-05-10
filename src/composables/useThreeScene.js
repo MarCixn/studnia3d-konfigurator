@@ -23,7 +23,7 @@ export function useThreeScene(containerRef) {
             0.1,
             10000
         )
-        camera.position.set(1500, 1000, 1500)
+        camera.position.set(1500, 2100, 1500) // ~45 stopni
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -87,9 +87,14 @@ export function useThreeScene(containerRef) {
         stworzKatomierz()
         animate()
 
+        // Na mniejszych ekranach wyśrodkuj kamerę na starcie
+        if (window.innerWidth <= 900) {
+            setTimeout(() => centerCamera(), 100)
+        }
+
         // Watche
         watch(
-            () => [store.kategoria, store.wysokosc, store.glebokosc, store.mufyNaModelu, store.typyMuf, store.debugMode],
+            () => [store.kategoria, store.wysokosc, store.glebokosc, store.mufyNaModelu, store.typyMuf, store.debugMode, store.marginesKolizyjny],
             () => {
                 stworzStudnie()
                 stworzMiarkaY()
@@ -324,7 +329,7 @@ export function useThreeScene(containerRef) {
             studniaGroup.add(mesh)
 
             // Utwórz mesh kolizyjny (z marginesem)
-            const kolizjaRadius = outerRadius + (typ.margines || 0)
+            const kolizjaRadius = outerRadius + store.marginesKolizyjny
             const kolizjaShape = new THREE.Shape()
             kolizjaShape.absarc(0, 0, kolizjaRadius, 0, Math.PI * 2, false)
 
@@ -344,7 +349,7 @@ export function useThreeScene(containerRef) {
             kolizjeMeshe.push(kolizjaMesh)
 
             // Debug: pokaż margines kolizyjny
-            if (store.debugMode && typ.margines > 0) {
+            if (store.debugMode && store.marginesKolizyjny > 0) {
                 const matDebug = new THREE.MeshBasicMaterial({
                     color: 0xff0000,
                     transparent: true,
@@ -550,6 +555,11 @@ export function useThreeScene(containerRef) {
         camera.aspect = container.clientWidth / container.clientHeight
         camera.updateProjectionMatrix()
         renderer.setSize(container.clientWidth, container.clientHeight)
+
+        // Na mniejszych ekranach wyśrodkuj
+        if (window.innerWidth <= 900) {
+            centerCamera()
+        }
     }
 
     function animate() {
@@ -620,5 +630,16 @@ export function useThreeScene(containerRef) {
         renderer?.dispose()
     }
 
-    return { init, dispose }
+    function centerCamera() {
+        if (!controls || !camera) return
+        controls.target.set(0, store.wysokosc / 2, 0)
+        // Na mniejszych ekranach kamera bliżej
+        // Kąt 45 stopni: Y offset = dystans poziomy * sqrt(2) / 2
+        const dist = window.innerWidth <= 600 ? 1200 : 1500
+        const yOffset = dist * 1.4 // ~45 stopni
+        camera.position.set(dist, store.wysokosc / 2 + yOffset, dist)
+        controls.update()
+    }
+
+    return { init, dispose, centerCamera }
 }

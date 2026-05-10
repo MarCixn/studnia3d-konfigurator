@@ -26,13 +26,20 @@ export const store = reactive({
 
     // Typy muf (definicje)
     typyMuf: [
-        { nazwa: 'DN110', srWewn: 110, srZewn: 125, kolor: '#ffffff', margines: 20 },
-        { nazwa: 'DN160', srWewn: 160, srZewn: 180, kolor: '#ffffff', margines: 20 },
-        { nazwa: 'DN200', srWewn: 200, srZewn: 225, kolor: '#e94560', margines: 20 }
+        { nazwa: 'DN110', srWewn: 110, srZewn: 125, kolor: '#ffffff' },
+        { nazwa: 'DN160', srWewn: 160, srZewn: 180, kolor: '#ffffff' },
+        { nazwa: 'DN200', srWewn: 200, srZewn: 225, kolor: '#e94560' }
     ],
 
-    // Mufy dodane na model
-    mufyNaModelu: [],
+    // Globalny margines kolizyjny
+    marginesKolizyjny: 20,
+
+    // Mufy dodane na model (testowe)
+    mufyNaModelu: [
+        { rodzaj: 'DN200', kat: 0, wysokoscOdDna: 300 },
+        { rodzaj: 'DN110', kat: 153, wysokoscOdDna: 510 },
+        { rodzaj: 'DN160', kat: 250, wysokoscOdDna: 420 }
+    ],
 
     // Preferencje
     mufyOdDna: savedMufyOdDna !== null ? savedMufyOdDna === 'true' : true, // domyślnie od dna
@@ -62,10 +69,10 @@ watch(() => store.mufyOdSrodka, (val) => {
 // Akcje - funkcje modyfikujące stan
 export const actions = {
     // Typy muf
-    dodajTypMufy(nazwa, srWewn, srZewn, kolor, margines) {
+    dodajTypMufy(nazwa, srWewn, srZewn, kolor) {
         if (!nazwa || store.typyMuf.some(t => t.nazwa === nazwa)) return false
         if (srWewn >= srZewn) return false
-        store.typyMuf.push({ nazwa, srWewn, srZewn, kolor: kolor || '#e94560', margines: margines || 20 })
+        store.typyMuf.push({ nazwa, srWewn, srZewn, kolor: kolor || '#e94560' })
         return true
     },
 
@@ -108,8 +115,8 @@ export const actions = {
         const typ2 = store.typyMuf.find(t => t.nazwa === mufa2.rodzaj)
         if (!typ1 || !typ2) return false
 
-        const r1 = typ1.srZewn / 2 + (typ1.margines || 0)
-        const r2 = typ2.srZewn / 2 + (typ2.margines || 0)
+        const r1 = typ1.srZewn / 2 + store.marginesKolizyjny
+        const r2 = typ2.srZewn / 2 + store.marginesKolizyjny
 
         // Różnica wysokości
         const dy = Math.abs(mufa2.wysokoscOdDna - mufa1.wysokoscOdDna)

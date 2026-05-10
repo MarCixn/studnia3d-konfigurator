@@ -33,39 +33,11 @@
     <button class="btn-dodaj" @click="dodajMufe" :disabled="store.mufyNaModelu.length >= 20">
       + Dodaj mufę
     </button>
-
-    <!-- Export PDF -->
-    <div class="pdf-section">
-      <h3>Eksport PDF</h3>
-      <div class="form-group">
-        <label>Nazwa klienta / firmy</label>
-        <input type="text" v-model="nazwaKlienta" placeholder="np. Firma XYZ Sp. z o.o.">
-      </div>
-      <button class="btn-pdf" @click="eksportujPdf">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="12" y1="18" x2="12" y2="12"/>
-          <line x1="9" y1="15" x2="12" y2="18"/>
-          <line x1="15" y1="15" x2="12" y2="18"/>
-        </svg>
-        Generuj kartę technologiczną (PDF)
-      </button>
-    </div>
   </section>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { store, actions } from '../stores/studniaStore'
-import { usePdfExport } from '../composables/usePdfExport'
-
-const nazwaKlienta = ref('')
-const { generujPdf } = usePdfExport()
-
-function eksportujPdf() {
-  generujPdf(nazwaKlienta.value)
-}
 
 function getWysokoscDisplay(mufa) {
   const typ = store.typyMuf.find(t => t.nazwa === mufa.rodzaj)
@@ -147,8 +119,6 @@ h3 {
 }
 
 .mufy-lista {
-  max-height: 300px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -252,70 +222,13 @@ h3 {
   cursor: not-allowed;
 }
 
-.pdf-section {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 2px solid #e5e7eb;
-}
+@media (max-width: 480px) {
+  .mufa-row {
+    flex-wrap: wrap;
+  }
 
-.pdf-section h3 {
-  color: #059669;
-  margin-top: 0;
-}
-
-.pdf-section .form-group {
-  margin-bottom: 10px;
-}
-
-.pdf-section .form-group label {
-  display: block;
-  font-size: 11px;
-  color: #374151;
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-.pdf-section .form-group input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 12px;
-  background: #fff;
-}
-
-.pdf-section .form-group input:focus {
-  outline: none;
-  border-color: #059669;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-}
-
-.btn-pdf {
-  width: 100%;
-  padding: 12px 16px;
-  background: linear-gradient(to bottom, #059669, #047857);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
-  transition: all 0.2s;
-}
-
-.btn-pdf:hover {
-  background: linear-gradient(to bottom, #047857, #065f46);
-  box-shadow: 0 4px 8px rgba(5, 150, 105, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-pdf svg {
-  width: 18px;
-  height: 18px;
+  .mufa-field {
+    min-width: 60px;
+  }
 }
 </style>

@@ -26,6 +26,11 @@
       </div>
     </div>
 
+    <div class="preference-row">
+      <span class="pref-label">Margines kolizyjny (mm):</span>
+      <input type="number" v-model.number="store.marginesKolizyjny" min="0" max="200" step="5" class="margines-input">
+    </div>
+
     <h3>Dodaj typ mufy</h3>
 
     <div class="form-group">
@@ -42,15 +47,9 @@
         <input type="number" v-model.number="nowaSrZewn" min="25" max="600">
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Kolor</label>
-        <input type="color" v-model="nowyKolor" class="color-input">
-      </div>
-      <div class="form-group">
-        <label>Margines (mm)</label>
-        <input type="number" v-model.number="nowyMargines" min="0" max="100" step="5">
-      </div>
+    <div class="form-group">
+      <label>Kolor</label>
+      <input type="color" v-model="nowyKolor" class="color-input">
     </div>
     <button class="btn-primary" @click="dodajTyp">Dodaj typ mufy</button>
 
@@ -76,10 +75,6 @@
             <label>Kolor</label>
             <input type="color" v-model="typ.kolor" class="color-small">
           </div>
-          <div class="typ-field">
-            <label>Margines</label>
-            <input type="number" v-model.number="typ.margines" min="0" max="100" step="5">
-          </div>
         </div>
       </div>
       <div v-if="store.typyMuf.length === 0" class="empty">
@@ -97,14 +92,13 @@ const nowaNazwa = ref('')
 const nowaSrWewn = ref(110)
 const nowaSrZewn = ref(125)
 const nowyKolor = ref('#ffffff')
-const nowyMargines = ref(20)
 
 function dodajTyp() {
   if (!nowaNazwa.value) {
     alert('Podaj nazwę mufy!')
     return
   }
-  if (!actions.dodajTypMufy(nowaNazwa.value, nowaSrWewn.value, nowaSrZewn.value, nowyKolor.value, nowyMargines.value)) {
+  if (!actions.dodajTypMufy(nowaNazwa.value, nowaSrWewn.value, nowaSrZewn.value, nowyKolor.value)) {
     alert('Nazwa już istnieje lub średnice są nieprawidłowe!')
     return
   }
@@ -290,6 +284,12 @@ input:focus {
   font-weight: 500;
 }
 
+.margines-input {
+  width: 80px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
 .toggle-container {
   display: flex;
   align-items: center;
@@ -351,5 +351,32 @@ input:focus {
 
 .toggle input:checked + .slider:before {
   transform: translateX(18px);
+}
+
+@media (max-width: 480px) {
+  .preference-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .toggle-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .typ-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .typy-lista {
+    max-height: 250px;
+  }
 }
 </style>
