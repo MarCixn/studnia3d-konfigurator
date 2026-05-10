@@ -22,7 +22,7 @@ import { ref } from 'vue'
 import SceneViewer from './components/SceneViewer.vue'
 import Panel from './components/Panel.vue'
 
-const panelOpen = ref(true)
+const panelOpen = ref(window.innerWidth > 768)
 
 function onSceneClick() {
   if (window.innerWidth <= 900 && panelOpen.value) {

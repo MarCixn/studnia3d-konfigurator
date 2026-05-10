@@ -1,5 +1,6 @@
 <template>
   <div class="panel" :class="{ open: isOpen }">
+    <button class="close-btn" @click="$emit('toggle')">×</button>
     <div class="panel-content">
       <h2>Konfigurator Studni</h2>
 
@@ -101,6 +102,28 @@ function eksportujPdf() {
   transform: translateX(0);
 }
 
+.close-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.close-btn:hover {
+  background: #dc2626;
+}
+
 .panel-content {
   flex: 1;
   overflow-y: auto;
@@ -177,8 +200,15 @@ function eksportujPdf() {
     max-width: 100vw;
   }
 
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .panel-content {
     padding: 15px;
+    padding-top: 50px;
   }
 
   .panel-footer {
