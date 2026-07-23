@@ -2,8 +2,8 @@
   <div class="app-wrapper">
     <div class="demo-banner">
       <span class="demo-title">DEMO KONFIGURATOR</span>
-      <a href="./showcase.html" class="demo-info">
-        <img src="./showcase/start.png" alt="O projekcie" class="demo-thumb" />
+      <a href="/showcase.html" class="demo-info">
+        <img src="/showcase/start.png" alt="O projekcie" class="demo-thumb" />
         <span>O projekcie</span>
       </a>
       <span class="demo-author">Wykonanie: Marcin Łotocki</span>

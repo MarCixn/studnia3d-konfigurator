@@ -1,8 +1,14 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg'
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh'
 import { store } from '../stores/studniaStore'
 import { watch } from 'vue'
+
+// Dodaj BVH support do BufferGeometry
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree
+THREE.Mesh.prototype.raycast = acceleratedRaycast
 
 export function useThreeScene(containerRef) {
     let scene, camera, renderer, controls
@@ -297,7 +303,15 @@ export function useThreeScene(containerRef) {
             const outerRadius = typ.srZewn / 2
             const innerRadius = typ.srWewn / 2
             const wystajNaZewn = -123 // skrócona o 173mm od zewnątrz (było 50, teraz 50-173=-123)
-            const wystajDoSrodka = 147 // ile wystaje do środka studni od wewnętrznej ściany
+            let wystajDoSrodka = 147 // ile wystaje do środka studni od wewnętrznej ściany
+            let dodatkowe70mm = 0
+
+            // Jeśli średnica zewnętrzna > 288mm, wydłuż DO ŚRODKA STUDNI o 70mm
+            if (typ.srZewn > 288) {
+                wystajDoSrodka += 70  // 147 + 70 = 217mm (dłuższa do środka)
+                dodatkowe70mm = 70
+            }
+
             const dlugoscMufy = gruboscScianki + wystajNaZewn + wystajDoSrodka
 
             // Kształt pierścienia (przekrój mufy)
@@ -313,13 +327,20 @@ export function useThreeScene(containerRef) {
                 curveSegments: 32
             })
             geometry.rotateX(Math.PI / 2)
-            geometry.translate(0, -dlugoscMufy / 2, 0)
+            // Przesuń o połowę długości + dodatkową połowę 70mm w kierunku środka
+            geometry.translate(0, -dlugoscMufy / 2 - dodatkowe70mm / 2, 0)
 
             const mesh = new THREE.Mesh(geometry, matMufa)
 
             const katRad = ((mufa.kat + 270) * Math.PI) / 180
             // Pozycja: 154.5mm bliżej środka sceny (korekta -170mm)
-            const mufaPos = promienZewn - 154.5
+            let mufaPos = promienZewn - 154.5
+
+            // Jeśli średnica > 288mm, przesuń CAŁĄ mufę 110mm w kierunku środka
+            if (typ.srZewn > 288) {
+                mufaPos -= 110
+            }
+
             mesh.position.x = Math.cos(katRad) * mufaPos
             mesh.position.z = Math.sin(katRad) * mufaPos
             mesh.position.y = mufa.wysokoscOdDna
@@ -328,7 +349,7 @@ export function useThreeScene(containerRef) {
 
             studniaGroup.add(mesh)
 
-            // Utwórz mesh kolizyjny (z marginesem)
+            // Utwórz mesh kolizyjny (cylinder z marginesem)
             const kolizjaRadius = outerRadius + store.marginesKolizyjny
             const kolizjaShape = new THREE.Shape()
             kolizjaShape.absarc(0, 0, kolizjaRadius, 0, Math.PI * 2, false)
@@ -339,47 +360,67 @@ export function useThreeScene(containerRef) {
                 curveSegments: 16
             })
             kolizjaGeo.rotateX(Math.PI / 2)
-            kolizjaGeo.translate(0, -dlugoscMufy / 2, 0)
+            // Przesuń tak samo jak główną geometrię - w kierunku środka studni
+            kolizjaGeo.translate(0, -dlugoscMufy / 2 - dodatkowe70mm / 2, 0)
 
-            const kolizjaMesh = new THREE.Mesh(kolizjaGeo)
+            // Zbuduj BVH tree dla precyzyjnej detekcji kolizji
+            kolizjaGeo.computeBoundsTree()
+
+            // Materiał: niewidoczny normalnie, widoczny w debug mode
+            const kolizjaMat = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: store.debugMode ? 0.2 : 0,
+                side: THREE.DoubleSide,
+                depthTest: false
+            })
+
+            const kolizjaMesh = new THREE.Mesh(kolizjaGeo, kolizjaMat)
             kolizjaMesh.position.copy(mesh.position)
             kolizjaMesh.rotation.copy(mesh.rotation)
-            kolizjaMesh.updateMatrixWorld(true)
+            kolizjaMesh.renderOrder = 999 // Renderuj po wszystkim
             kolizjaMesh.userData.index = index
+            kolizjaMesh.userData.radius = kolizjaRadius // Zapisz promień czerwonego cylindra
+            kolizjaMesh.userData.length = dlugoscMufy // Zapisz długość
             kolizjeMeshe.push(kolizjaMesh)
+            studniaGroup.add(kolizjaMesh)
 
-            // Debug: pokaż margines kolizyjny
-            if (store.debugMode && store.marginesKolizyjny > 0) {
-                const matDebug = new THREE.MeshBasicMaterial({
-                    color: 0xff0000,
-                    transparent: true,
-                    opacity: 0.2,
-                    side: THREE.DoubleSide
-                })
-                const debugMesh = new THREE.Mesh(kolizjaGeo.clone(), matDebug)
-                debugMesh.position.copy(mesh.position)
-                debugMesh.rotation.copy(mesh.rotation)
-                studniaGroup.add(debugMesh)
-
-                // Wireframe
-                const wireMat = new THREE.MeshBasicMaterial({
-                    color: 0xff0000,
-                    wireframe: true
-                })
-                const wireMesh = new THREE.Mesh(kolizjaGeo.clone(), wireMat)
+            // Wireframe tylko w debug mode
+            if (store.debugMode) {
+                const wireMat = new THREE.LineBasicMaterial({ color: 0xff0000 })
+                const wireGeo = new THREE.WireframeGeometry(kolizjaGeo)
+                const wireMesh = new THREE.LineSegments(wireGeo, wireMat)
                 wireMesh.position.copy(mesh.position)
                 wireMesh.rotation.copy(mesh.rotation)
                 studniaGroup.add(wireMesh)
             }
         })
 
-        // Sprawdź kolizje używając Box3
+        // Sprawdź kolizje - CZERWONY cylinder do CZERWONEGO cylindra (prosta odległość 3D)
         const wykryteKolizje = []
+
         for (let i = 0; i < kolizjeMeshe.length; i++) {
-            const box1 = new THREE.Box3().setFromObject(kolizjeMeshe[i])
+            const cyl1 = kolizjeMeshe[i]
+            const r1 = cyl1.userData.radius
+            const pos1 = cyl1.position
+
             for (let j = i + 1; j < kolizjeMeshe.length; j++) {
-                const box2 = new THREE.Box3().setFromObject(kolizjeMeshe[j])
-                if (box1.intersectsBox(box2)) {
+                const cyl2 = kolizjeMeshe[j]
+                const r2 = cyl2.userData.radius
+                const pos2 = cyl2.position
+
+                // Odległość 3D między środkami CZERWONYCH cylindrów
+                const dx = pos2.x - pos1.x
+                const dy = pos2.y - pos1.y
+                const dz = pos2.z - pos1.z
+                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+                // Kolizja jeśli odległość między środkami < suma promieni
+                // UWAGA: Margines jest już w r1 i r2, więc odejmujemy jeden margines
+                // żeby nie liczyć podwójnie
+                const sumaPromieni = r1 + r2 - store.marginesKolizyjny
+
+                if (distance < sumaPromieni) {
                     wykryteKolizje.push([i, j])
                 }
             }
@@ -504,32 +545,36 @@ export function useThreeScene(containerRef) {
         }
 
         // Sprawdź czy kliknięto blisko mufy - jeśli tak, użyj jej środka
+        // WYŁĄCZONE dla pomiaru 3D (odleglosc3d) - tylko punkt-punkt bez snap
         const promienZewn = store.kategoria / 2
         let mufaIndex = null
-        for (let i = 0; i < store.mufyNaModelu.length; i++) {
-            const mufa = store.mufyNaModelu[i]
-            const typ = store.typyMuf.find(t => t.nazwa === mufa.rodzaj)
-            if (!typ) continue
 
-            const katRad = ((mufa.kat + 270) * Math.PI) / 180
-            const mufaCenterX = Math.cos(katRad) * promienZewn
-            const mufaCenterZ = Math.sin(katRad) * promienZewn
-            const mufaCenterY = mufa.wysokoscOdDna
+        if (store.aktywneNarzedzie !== 'odleglosc3d') {
+            for (let i = 0; i < store.mufyNaModelu.length; i++) {
+                const mufa = store.mufyNaModelu[i]
+                const typ = store.typyMuf.find(t => t.nazwa === mufa.rodzaj)
+                if (!typ) continue
 
-            // Odległość od środka mufy
-            const dx = punkt.x - mufaCenterX
-            const dy = punkt.y - mufaCenterY
-            const dz = punkt.z - mufaCenterZ
-            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
+                const katRad = ((mufa.kat + 270) * Math.PI) / 180
+                const mufaCenterX = Math.cos(katRad) * promienZewn
+                const mufaCenterZ = Math.sin(katRad) * promienZewn
+                const mufaCenterY = mufa.wysokoscOdDna
 
-            // Jeśli blisko mufy (w promieniu zewnętrznym + margines), użyj środka
-            const promienMufy = typ.srZewn / 2 + 50
-            if (dist < promienMufy) {
-                punkt.x = mufaCenterX
-                punkt.y = mufaCenterY
-                punkt.z = mufaCenterZ
-                mufaIndex = i
-                break
+                // Odległość od środka mufy
+                const dx = punkt.x - mufaCenterX
+                const dy = punkt.y - mufaCenterY
+                const dz = punkt.z - mufaCenterZ
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+                // Jeśli blisko mufy (w promieniu zewnętrznym + margines), użyj środka
+                const promienMufy = typ.srZewn / 2 + 50
+                if (dist < promienMufy) {
+                    punkt.x = mufaCenterX
+                    punkt.y = mufaCenterY
+                    punkt.z = mufaCenterZ
+                    mufaIndex = i
+                    break
+                }
             }
         }
 

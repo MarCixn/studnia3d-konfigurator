@@ -17,6 +17,30 @@ function setCookie(name, value, days = 365) {
 const savedMufyOdDna = getCookie('mufyOdDna')
 const savedMufyOdSrodka = getCookie('mufyOdSrodka')
 
+// Wczytaj typy muf z localStorage
+function getTypyMufFromStorage() {
+    try {
+        const saved = localStorage.getItem('typyMuf')
+        if (saved) {
+            const parsed = JSON.parse(saved)
+            // Sprawdź czy są jakieś własne typy (ponad 3 domyślne)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed
+            }
+        }
+    } catch (e) {
+        console.warn('Błąd wczytywania typów muf:', e)
+    }
+    // Zwróć domyślne typy jeśli nie ma zapisanych
+    return [
+        { nazwa: 'DN110', srWewn: 110, srZewn: 125, kolor: '#ffffff' },
+        { nazwa: 'DN160', srWewn: 160, srZewn: 180, kolor: '#ffffff' },
+        { nazwa: 'DN200', srWewn: 200, srZewn: 225, kolor: '#e94560' }
+    ]
+}
+
+const savedTypyMuf = getTypyMufFromStorage()
+
 // Centralny stan aplikacji - wszystkie komponenty go widzą
 export const store = reactive({
     // Parametry studni
@@ -24,12 +48,8 @@ export const store = reactive({
     wysokosc: 800,
     glebokosc: 200,
 
-    // Typy muf (definicje)
-    typyMuf: [
-        { nazwa: 'DN110', srWewn: 110, srZewn: 125, kolor: '#ffffff' },
-        { nazwa: 'DN160', srWewn: 160, srZewn: 180, kolor: '#ffffff' },
-        { nazwa: 'DN200', srWewn: 200, srZewn: 225, kolor: '#e94560' }
-    ],
+    // Typy muf (definicje) - wczytane z localStorage lub domyślne
+    typyMuf: savedTypyMuf,
 
     // Globalny margines kolizyjny
     marginesKolizyjny: 20,
@@ -66,6 +86,15 @@ watch(() => store.mufyOdSrodka, (val) => {
     setCookie('mufyOdSrodka', val)
 })
 
+// Zapisuj typy muf do localStorage przy każdej zmianie
+watch(() => store.typyMuf, (typyMuf) => {
+    try {
+        localStorage.setItem('typyMuf', JSON.stringify(typyMuf))
+    } catch (e) {
+        console.warn('Błąd zapisywania typów muf:', e)
+    }
+}, { deep: true })
+
 // Akcje - funkcje modyfikujące stan
 export const actions = {
     // Typy muf
@@ -93,45 +122,5 @@ export const actions = {
 
     usunMufe(index) {
         store.mufyNaModelu.splice(index, 1)
-    },
-
-    // Sprawdź kolizje między mufami
-    sprawdzKolizje() {
-        const kolizje = []
-        const mufy = store.mufyNaModelu
-
-        for (let i = 0; i < mufy.length; i++) {
-            for (let j = i + 1; j < mufy.length; j++) {
-                if (this.czyKoliduja(mufy[i], mufy[j])) {
-                    kolizje.push([i, j])
-                }
-            }
-        }
-        return kolizje
-    },
-
-    czyKoliduja(mufa1, mufa2) {
-        const typ1 = store.typyMuf.find(t => t.nazwa === mufa1.rodzaj)
-        const typ2 = store.typyMuf.find(t => t.nazwa === mufa2.rodzaj)
-        if (!typ1 || !typ2) return false
-
-        const r1 = typ1.srZewn / 2 + store.marginesKolizyjny
-        const r2 = typ2.srZewn / 2 + store.marginesKolizyjny
-
-        // Różnica wysokości
-        const dy = Math.abs(mufa2.wysokoscOdDna - mufa1.wysokoscOdDna)
-
-        // Różnica kąta - odległość po obwodzie
-        const promienZewn = store.kategoria / 2
-        const mufaPos = promienZewn - 154.5
-        let dKat = Math.abs(mufa2.kat - mufa1.kat)
-        if (dKat > 180) dKat = 360 - dKat
-        const dLuk = (dKat * Math.PI / 180) * mufaPos
-
-        // Odległość 2D: wysokość + łuk
-        const odleglosc = Math.sqrt(dy * dy + dLuk * dLuk)
-
-        // Kolizja jeśli odległość <= suma promieni
-        return odleglosc <= (r1 + r2)
     }
 }
